@@ -1,9 +1,9 @@
-from PyQt5.QtWidgets import QMainWindow, QApplication, QComboBox, QSlider, QPushButton
-from PyQt5 import QtWidgets
-from PyQt5.QtGui import QPainter, QColor, QPen ,QFont,QPixmap
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton
+from PyQt5.QtGui import QPainter, QColor, QPen
+from PyQt5.QtCore import Qt
 from Tic_Tac_Toe import TicTacToe
-import sys, os
+from Tic_Tac_Toe_utils import *
+import sys
 
 class GameWindow(QMainWindow):
     def __init__(self):
@@ -20,7 +20,7 @@ class GameWindow(QMainWindow):
         self.gap = 100
         self.BoardStart_pos = [50,50]
         self.mouse_events_enabled = False
-        self.game.print_board()
+        print_board(self.game.board)
         self.init_ui()
     def init_ui(self):
         self.startButton = QPushButton(self)
@@ -33,7 +33,7 @@ class GameWindow(QMainWindow):
             border-width: 0px;
             border-radius: 3px;
         }
-        
+
         QPushButton:hover
         {
             color: white;
@@ -41,7 +41,7 @@ class GameWindow(QMainWindow):
             border-width: 0px;
             border-radius: 3px;
         }
-        
+
         QPushButton:pressed
         {
             color: white;
@@ -62,7 +62,7 @@ class GameWindow(QMainWindow):
         self.startButton.setStyleSheet(button_styleSheet)
         self.startButton.setText("Start!")
         self.startButton.clicked.connect(self.StartGame)
-    
+
     def StartGame(self):
         print("Game Start!")
         if self.mouse_events_enabled:
@@ -72,24 +72,23 @@ class GameWindow(QMainWindow):
             self.mouse_events_enabled = True
             self.game.__init__()
             self.update()
-    
-    
+
     def mousePressEvent(self, event):
         if not self.mouse_events_enabled:
             return  # 如果滑鼠事件未啟用，則直接返回
         if event.button() == Qt.LeftButton:  # 確保是左鍵點擊
             x = event.x() - self.BoardStart_pos[0] + self.gap
             y = event.y() - self.BoardStart_pos[1] + self.gap
-            
+
             # 計算點擊的行和列
             row = y // self.gap - 1
             col = x // self.gap - 1
             print(f"{row} {col}")
             if self.game.current_player == -1:
                 self.mouse_events_enabled = True
-                if self.game.is_ValidMove(r=row,c=col):
+                if is_ValidMove(self.game.board, r=row,c=col):
                     self.game.board[row][col] = self.game.current_player
-                    self.game.print_board()
+                    print_board(self.game.board)
                     self.game.current_player *= -1
             if self.game.current_player == 1:
                 self.mouse_events_enabled = False
@@ -99,7 +98,7 @@ class GameWindow(QMainWindow):
                     self.game.board[r][c] = 1
                     self.game.current_player *= -1
                 self.mouse_events_enabled = True
-            
+
             if self.game.isWinner(-1):
                 self.mouse_events_enabled = False
                 print("Player X win!")
@@ -109,20 +108,15 @@ class GameWindow(QMainWindow):
             elif self.game.isTie():
                 self.mouse_events_enabled = False
                 print("Tie!")
-                
-            
+
             self.update()
-                                
-        
-        
+
     def paintEvent(self, event):
         painter = QPainter(self)
         self.draw_board(painter)
-    
+
     def draw_board(self, painter):
         black_pen = QPen(QColor('#000000'), 3)
-        red_pen = QPen(QColor('#EA0000'), 3)
-        blue_pen = QPen(QColor('#0000E3'), 3)
         # 畫格線
         length = self.gap * 3
         painter.setPen(black_pen)
@@ -130,14 +124,14 @@ class GameWindow(QMainWindow):
             y = self.BoardStart_pos[1] + i * self.gap
             painter.drawLine(self.BoardStart_pos[0], y, 
                            self.BoardStart_pos[0] + length, y)
-            
+
             x = self.BoardStart_pos[0] + i * self.gap
             painter.drawLine(x, self.BoardStart_pos[1], 
                            x, self.BoardStart_pos[1] + length)
-        
+
         x = self.BoardStart_pos[0] + self.gap//4
         y = self.BoardStart_pos[1] + self.gap//4
-        
+
         for i in range(3):
             x = self.BoardStart_pos[0] + self.gap//4
             for j in range(3):
